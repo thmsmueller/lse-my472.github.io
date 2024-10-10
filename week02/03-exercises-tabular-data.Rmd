@@ -25,9 +25,9 @@ folder you would like to store your local copy of your repo. You should replace
 `<url>` with the HTTPS link to your GitHub repo.
 
 ```{bash, eval = FALSE}
-cd <path>
-git _________ <url>
-cd _________
+cd /Users/thomasmueller/Local
+git clone https://github.com/thmsmueller/seminar02.git
+cd seminar02
 ```
 
 Now, save this Rmd file, close it, and move it into your local copy of the 
@@ -38,9 +38,9 @@ Next, stage, commit and push your changes to your repo, using "added seminar
 file" as your commit message.
 
 ```{bash, eval = FALSE}
-git _________ 03-exercises-tabular-data.Rmd
-git _________ -m "_________"
-git _________
+git add 03-exercises-tabular-data.Rmd
+git commit -m "added seminar file"
+git push
 ```
 
 Check on the GitHub website that this file now appears in your repository.
@@ -49,12 +49,12 @@ Now, let's get to work with R. Start with setting up your workspace:
 
 ```{r setup}
 # load in libraries:
-suppressMessages(library(_________))
-# or just library(____________)
+suppressMessages(library(tidyverse))
+# or just library(tidyverse)
 
 # read ip_and_unemployment.csv
-ip_and_unemployment <- _________________
-head(______)
+ip_and_unemployment <- read.csv("ip_and_unemployment.csv")
+head(ip_and_unemployment)
 
 ```
     
@@ -69,30 +69,30 @@ would do this for any country?)
 
 # data processing
 ipu_clean <- ip_and_unemployment %>%
-  pivot_____(id_cols = c(_____, _____), 
-              names_from = ______, values_from = ______)  # long to wide
+  pivot_wider(id_cols = c("country","date"), 
+              names_from = series, values_from = value)  # long to wide
 
 # France
 ipu_clean %>%
-  filter(country == _____) %>%
-  _____(unemployment == max(_______, na.rm = TRUE) | 
+  filter(country == c("france")) %>%
+  filter(unemployment == max(unemployment, na.rm = TRUE) | 
            ip == min(ip, na.rm = TRUE)) 
     # need to add na.rm = TRUE, because ip contains NA and min() will return NA
     # if there is one NA, unless na.rm = TRUE
 
 # Spain
 ipu_clean %>%
-  _____(_____ == _____) %>%
-  filter(unemployment == ________________________  | 
-           __ == ____________________)
+  filter(country == c("spain")) %>%
+  filter(unemployment == max(unemployment, na.rm = TRUE)  | 
+           ip == min(ip, na.rm = TRUE))
 
 # Optional --------------------------------------------------------------------
 filter_worst_months <- function(x) {
   filtered <- ipu_clean %>%
-    _____(country == x) %>%
-    _____(____________ == ________________________ | 
-             ip == ________________________)
-  return(_______)
+    filter(country == x) %>%
+    filter(unemployment == max(unemployment, na.rm = TRUE) | 
+             ip == min(ip, na.rm = TRUE))
+  return(filtered)
 }
 
 filter_worst_months("germany")
@@ -109,17 +109,17 @@ functions? (_Optional_: can you calculate the % of values that are non-NA?)
 # Q2 --------------------------------------------------------------------------
 # Non-NA group_by and summarise
 ipu_clean %>%
-  _______(country) %>%
-  __________(nonNA_ip = sum(!is.na(__)),
-            nonNA_ue = sum(_________________))
+  group_by(country) %>%
+  summarise(nonNA_ip = sum(!is.na(ip)),
+            nonNA_ue = sum(!is.na(unemployment)))
 
 # Optional --------------------------------------------------------------------
 ipu_clean %>%
-  group_by(_______) %>%
-  __________(nonNA_ip = _____________),
-            nonNA_ue = ____________________),
-            nonNA_ip_pct = nonNA_ip / length(__),
-            nonNA_ue_pct = nonNA_ue / ______________________)
+  group_by(country) %>%
+  summarise(nonNA_ip = sum(!is.na(ip)),
+            nonNA_ue = sum(!is.na(unemployment)),
+            nonNA_ip_pct = nonNA_ip / length(ip),
+            nonNA_ue_pct = nonNA_ue / length(unemployment))
 
 
 ```
@@ -136,9 +136,9 @@ local git repository and the remote copy on GitHub reflects your work so far.
 When you commit your changes, use "finished first half" as your commit message.
 
 ```{bash, eval = FALSE}
-git _________ 03-exercises-tabular-data.Rmd
-git _________ -m "_________"
-git _________
+git add 03-exercises-tabular-data.Rmd
+git commit -m "finished first half"
+git push
 ```
 
 Before you do the final analysis, create a branch of your git repository that
